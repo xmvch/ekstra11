@@ -1,4 +1,4 @@
-# ekstra11 # | # EKSTRA11.PL
+# ekstra11 | EKSTRA11.PL
 Piłkarski draft przeglądarkowy stworzony dla fanów Ekstraklasy.
 
 ## O projekcie
