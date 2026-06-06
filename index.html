@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EKSTRA11.PL - Draft</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        
+        /* MODERN CSS VARIABLES */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-body: #f8fafc;
+            --bg-panel: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --primary: #2563eb;       
+            --primary-hover: #1d4ed8;
+            --accent: #10b981;        
+            --pitch-dark: #15803d;
+            --pitch-light: #16a34a;
+            --pitch-lines: rgba(255, 255, 255, 0.5);
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* DARK THEME (For Summary) */
+            --dark-bg: #0a0a0c;
+            --dark-panel: #111114;
+            --dark-border: #222225;
+            --dark-text: #ffffff;
+            --dark-muted: #888888;
+            --c-win: #10b981;
+            --c-draw: #fbbf24;
+            --c-loss: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeOutUp { to { opacity: 0; transform: translateY(-30px); visibility: hidden; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { opacity: 0; transform: translate(-50%, -30px) scale(0.8); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+        /* HOME SCREEN */
+        #home-screen {
+            position: fixed; inset: 0; background: var(--bg-body); z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .home-logo {
+            font-size: 5rem; font-weight: 900; letter-spacing: -3px; 
+            color: var(--primary); font-style: italic;
+            margin-bottom: 5px; text-transform: uppercase;
+        }
+        .home-subtitle {
+            font-size: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px;
+            color: var(--text-muted); margin-bottom: 50px; text-align: center;
+            padding: 0 20px;
+        }
+        .formation-selector {
+            background: var(--bg-panel); border: 1px solid var(--border); padding: 40px;
+            box-shadow: var(--shadow-lg); border-radius: var(--radius-md); text-align: center; margin-bottom: 40px;
+            max-width: 90%;
+        }
+        .formation-selector h3 {
+            font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-muted); margin-bottom: 25px;
+        }
+        .fmt-grid { display: flex; gap: 15px; }
+        .fmt-btn {
+            border: 1px solid var(--border); padding: 12px 24px; font-size: 1.1rem; font-weight: 600;
+            background: var(--bg-body); cursor: pointer; transition: all 0.2s ease; border-radius: var(--radius-sm);
+            color: var(--text-muted);
+        }
+        .fmt-btn:hover:not(.active) { border-color: var(--text-light); color: var(--text-main); }
+        .fmt-btn.active {
+            background: var(--primary); color: white; border-color: var(--primary);
+            box-shadow: 0 8px 15px rgba(37, 99, 235, 0.25); transform: translateY(-3px);
+        }
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white; border: none; padding: 20px 60px; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3); transition: all 0.3s ease; border-radius: 50px;
+        }
+        .start-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4); }
+
+        /* STATYSTYKI NA STRONIE GŁÓWNEJ */
+        .home-stats {
+            display: flex; gap: 50px; text-align: center; margin-top: 40px;
+            animation: fadeIn 1s ease 0.3s both;
+        }
+        .stat-item { display: flex; flex-direction: column; gap: 5px; }
+        .stat-num { font-size: 2rem; font-weight: 900; color: var(--text-main); line-height: 1; }
+        .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* HEADER */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 50px; background: var(--bg-panel); box-shadow: var(--shadow-sm); margin-bottom: 30px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 15px; }
+        .logo-70 { font-size: 2.5rem; font-weight: 900; letter-spacing: -2px; color: var(--primary); font-style: italic; line-height: 1; }
+        .logo-text { display: flex; flex-direction: column; justify-content: center; }
+        .logo-title { font-size: 1.1rem; font-weight: 800; line-height: 1.2; text-transform: uppercase; letter-spacing: -0.5px; color: var(--text-main); }
+        .logo-sub { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); }
+
+        .header-menu { display: flex; align-items: center; gap: 15px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .menu-btn { 
+            border: 1px solid var(--border); padding: 8px 16px; border-radius: 50px; 
+            cursor: pointer; transition: 0.2s; background: var(--bg-body); font-weight: 600; color: var(--text-main);
+        }
+        .menu-btn:hover { background: var(--border); }
+
+        /* LAYOUT */
+        .app-container {
+            display: grid; grid-template-columns: 320px 1fr 320px; gap: 30px;
+            flex: 1; padding: 0 50px; opacity: 0; transition: opacity 0.5s;
+        }
+
+        /* PANELS */
+        .left-panel, .right-panel {
+            background: var(--bg-panel); border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+            padding: 30px; display: flex; flex-direction: column; border: 1px solid var(--border-light);
+            height: fit-content; max-height: calc(100vh - 150px); overflow-y: auto;
+        }
+        
+        .section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-light); margin-bottom: 12px; }
+        
+        /* DRAWN CARD */
+        .drawn-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc); border: 1px solid var(--border); border-radius: var(--radius-sm);
+            padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 25px; display: none; text-align: center;
+        }
+        .drawn-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 5px; color: var(--text-main); }
+        .drawn-cup { font-size: 1rem; font-weight: 700; color: var(--accent); }
+
+        /* DRAFT LIST */
+        .player-list-wrapper { display: none; }
+        .draft-card {
+            display: flex; align-items: center; padding: 12px 15px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+            cursor: pointer; transition: all 0.2s ease; font-size: 0.85rem; font-weight: 600; background: var(--bg-panel); margin-bottom: 8px;
+        }
+        .draft-card:hover:not(.disabled):not(.selected) { border-color: var(--primary); transform: translateX(4px); box-shadow: var(--shadow-sm); }
+        .draft-card.disabled { opacity: 0.4; cursor: not-allowed; background: var(--bg-body); border-color: transparent;}
+        .draft-card.selected { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        
+        .p-num { width: 30px; color: var(--text-light); font-size: 0.75rem; }
+        .draft-card.selected .p-num { color: rgba(255,255,255,0.7); }
+        .p-name { flex: 1; font-weight: 700; }
+        .p-pos { width: 45px; text-align: right; font-size: 0.7rem; color: var(--text-muted); margin-right: 15px; font-weight: 700;}
+        .draft-card.selected .p-pos { color: rgba(255,255,255,0.9); }
+        .p-ovr { font-size: 1.1rem; font-weight: 800; }
+
+        /* BUTTONS */
+        .initial-roll-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; border: none;
+            padding: 20px; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; cursor: pointer; letter-spacing: 1px;
+            border-radius: var(--radius-sm); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); width: 100%; transition: all 0.2s ease; margin-top: 15px;
+        }
+        .initial-roll-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35); }
+        .btn-alt { background: var(--text-main); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25); }
+        .btn-alt:hover { box-shadow: 0 12px 25px rgba(15, 23, 42, 0.35); }
+
+        /* CENTER PANEL (PITCH) */
+        .center-panel { display: flex; justify-content: center; align-items: flex-start; }
+        .pitch-container {
+            width: 100%; max-width: 580px; aspect-ratio: 7/10; 
+            background: linear-gradient(180deg, var(--pitch-dark) 0%, var(--pitch-light) 100%);
+            position: relative; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        .pitch-lines { position: absolute; inset: 15px; border: 1.5px solid var(--pitch-lines); pointer-events: none; border-radius: 4px;}
+        .pitch-lines::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1.5px; background: var(--pitch-lines); transform: translateY(-50%); }
+        .pitch-lines::after { content: ''; position: absolute; top: 50%; left: 50%; width: 110px; height: 110px; border: 1.5px solid var(--pitch-lines); border-radius: 50%; transform: translate(-50%, -50%); }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: var(--pitch-lines); border-radius: 50%; transform: translate(-50%, -50%); }
+        .penalty-area-top { position: absolute; top: 0; left: 22%; right: 22%; height: 14%; border: 1.5px solid var(--pitch-lines); border-top: none; }
+        .penalty-area-bottom { position: absolute; bottom: 0; left: 22%; right: 22%; height: 14%; border: 1.5px solid var(--pitch-lines); border-bottom: none; }
+        .penalty-arc-top { position: absolute; top: 14%; left: 38%; right: 38%; height: 40px; border: 1.5px solid var(--pitch-lines); border-top: none; border-radius: 0 0 50px 50px; }
+        .penalty-arc-bottom { position: absolute; bottom: 14%; left: 38%; right: 38%; height: 40px; border: 1.5px solid var(--pitch-lines); border-bottom: none; border-radius: 50px 50px 0 0; }
+        
+        .pitch-players { position: absolute; inset: 0; }
+        .p-node {
+            position: absolute; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+        
+        .p-circle {
+            width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-weight: 700; font-size: 0.8rem; transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+        }
+        
+        .p-node.filled .p-circle {
+            background: white; border: 2px solid white; color: var(--text-main); font-size: 1rem; font-weight: 800;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .p-name-pitch { 
+            margin-top: 6px; font-size: 0.65rem; font-weight: 700; color: white; background: var(--text-main);
+            padding: 3px 8px; border-radius: 12px; text-transform: uppercase; white-space: nowrap; display: none; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); letter-spacing: 0.5px;
+        }
+        .p-node.filled .p-name-pitch { display: block; animation: fadeIn 0.3s ease; }
+
+        .p-node.highlight-target { z-index: 10; }
+        .p-node.highlight-target .p-circle {
+            background: var(--accent); border-color: white; color: white; cursor: pointer;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3), 0 8px 15px rgba(0,0,0,0.2);
+            transform: scale(1.15); width: 48px; height: 48px; font-size: 0.9rem;
+        }
+        .p-node.highlight-target:hover .p-circle { transform: scale(1.25); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 10px 20px rgba(0,0,0,0.3); }
+
+        /* RIGHT PANEL */
+        .box-score-header { display: flex; justify-content: space-between; align-items: center; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 25px; letter-spacing: 1px; padding-bottom: 15px; border-bottom: 2px solid var(--border-light);}
+        
+        .roster-list { display: flex; flex-direction: column; }
+        .roster-row {
+            display: flex; align-items: center; padding: 12px 5px;
+            font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-light);
+            border-bottom: 1px solid var(--border-light); transition: 0.2s;
+        }
+        .roster-row:last-child { border-bottom: none; }
+        .roster-row.filled { color: var(--text-main); }
+        .r-pos { width: 45px; font-weight: 800; color: var(--primary); font-size: 0.75rem;}
+        .r-name { flex: 1; font-weight: 700;}
+        .r-ovr { width: 30px; text-align: right; display: none; font-weight: 800; color: var(--text-main);}
+        .roster-row.filled .r-ovr { display: block; }
+
+        .roster-divider { height: 2px; background: var(--border-light); margin: 8px 0; border-radius: 2px;}
+
+        /* FOOTER */
+        .footer { text-align: center; padding: 30px 15px; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: center; align-items: center; gap: 20px;}
+        .support-btn { background: transparent; color: var(--text-muted); padding: 8px 20px; border-radius: 50px; border: 1px solid var(--border); font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.7rem;}
+        .support-btn:hover { background: var(--border-light); color: var(--text-main);}
+
+        /* DARK LEAGUE SUMMARY MODAL */
+        #summary-overlay {
+            position: fixed; inset: 0; background: var(--dark-bg); z-index: 2000;
+            display: none; justify-content: center; align-items: flex-start; overflow-y: auto;
+            padding: 50px 20px; color: var(--dark-text);
+        }
+        .summary-container {
+            width: 100%; max-width: 650px; margin: 0 auto; animation: fadeIn 0.5s ease;
+        }
+        .summary-header { margin-bottom: 30px; }
+        .summary-header h2 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 5px;}
+        .summary-subtitle { font-size: 0.85rem; color: var(--dark-muted); font-weight: 600;}
+        
+        .squad-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 40px; }
+        .sq-row {
+            background: var(--dark-panel); border: 1px solid var(--dark-border); border-radius: var(--radius-sm);
+            padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .sq-left { display: flex; align-items: center; gap: 15px; }
+        .sq-pos { 
+            font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.1); padding: 4px 8px; 
+            border-radius: 4px; width: 45px; text-align: center; color: var(--dark-text);
+        }
+        .pos-ST, .pos-CF, .pos-RW, .pos-LW { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .pos-CM, .pos-CDM, .pos-CAM, .pos-RM, .pos-LM { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .pos-CB, .pos-LB, .pos-RB, .pos-LWB, .pos-RWB { background: rgba(52, 211, 153, 0.2); color: #6ee7b7; }
+        .pos-GK { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        
+        .sq-name { font-size: 0.95rem; font-weight: 700; }
+        .sq-right { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; font-weight: 600; color: var(--dark-muted); text-align: right;}
+        .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink:0; }
+
+        .perf-grid-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .box-dark { background: var(--dark-panel); border: 1px solid var(--dark-border); border-radius: var(--radius-sm); padding: 20px; text-align: center; }
+        .box-dark .box-label { font-size: 0.6rem; text-transform: uppercase; color: var(--dark-muted); font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;}
+        .box-dark .box-val { font-size: 2rem; font-weight: 900; }
+        
+        .box-text { text-align: left; padding: 25px; margin-bottom: 20px; }
+        .box-text h3 { font-size: 0.9rem; text-transform: uppercase; font-weight: 900; margin-bottom: 10px; }
+        .box-text p { font-size: 0.85rem; line-height: 1.6; color: #a1a1aa; }
+
+        .perf-grid-bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 40px; }
+.perf-grid-bottom .box-val { font-size: 2rem; }
+
+@media (max-width: 600px) {
+    .perf-grid-bottom { grid-template-columns: 1fr 1fr; }
+}
+        .c-win { color: var(--c-win); }
+        .c-draw { color: var(--c-draw); }
+        .c-loss { color: var(--c-loss); }
+
+        .btn-restart-dark {
+            background: #ffffff; color: #000000; padding: 15px 30px; font-size: 1rem; font-weight: 800; text-transform: uppercase;
+            border: none; border-radius: var(--radius-sm); cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 50px;
+        }
+        .btn-restart-dark:hover { background: #e0e0e0; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+        /* ========================================= */
+        /* RESPONSIVE DESIGN (MOBILE & TABLET FIXES) */
+        /* ========================================= */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                padding: 0 15px;
+                gap: 20px;
+            }
+            .left-panel, .right-panel {
+                max-height: none;
+                padding: 20px;
+            }
+            .header {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+                text-align: center;
+            }
+            .logo-area { justify-content: center; }
+            .home-logo { font-size: 3.5rem; }
+            .formation-selector { padding: 25px 15px; }
+            .fmt-grid { flex-wrap: wrap; justify-content: center; }
+            .fmt-btn { padding: 10px 15px; font-size: 1rem; }
+            
+            .pitch-container { max-width: 100%; margin: 0 auto; }
+            
+            .p-circle { width: 34px; height: 34px; font-size: 0.7rem; }
+            .p-node.filled .p-circle { width: 38px; height: 38px; font-size: 0.85rem; }
+            .p-node.highlight-target .p-circle { width: 42px; height: 42px; font-size: 0.85rem; }
+            .p-name-pitch { font-size: 0.55rem; padding: 2px 6px; margin-top: 4px; }
+            
+            .sq-row { padding: 10px 12px; flex-direction: column; align-items: flex-start; gap: 8px;}
+            .sq-right { width: 100%; justify-content: flex-end; }
+            .perf-grid-top, .perf-grid-bottom { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .perf-grid-top > div:last-child { grid-column: span 2; }
+            #summary-overlay { padding: 20px 10px; }
+        }
+        @media (max-width: 480px) {
+            .home-logo { font-size: 3rem; }
+            .home-subtitle { font-size: 0.75rem; }
+            .start-btn { padding: 15px 40px; font-size: 1rem; }
+            .pitch-container { max-width: 360px; }
+            
+            /* Responsive Stats */
+            .home-stats { gap: 20px; margin-top: 30px; }
+            .stat-num { font-size: 1.5rem; }
+            .stat-label { font-size: 0.6rem; letter-spacing: 0.5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HOME SCREEN -->
+    <div id="home-screen">
+        <div class="home-logo">EKSTRA11</div>
+        <div class="home-subtitle">Zbuduj swoją legendarną drużynę Ekstraklasy</div>
+        
+        <div class="formation-selector">
+            <h3>Wybierz formację taktyczną</h3>
+            <div class="fmt-grid" id="fmt-grid">
+                <button class="fmt-btn active" data-fmt="4-3-3">4-3-3</button>
+                <button class="fmt-btn" data-fmt="4-4-2">4-4-2</button>
+                <button class="fmt-btn" data-fmt="4-2-3-1">4-2-3-1</button>
+                <button class="fmt-btn" data-fmt="5-3-2">5-3-2</button>
+            </div>
+        </div>
+
+        <button class="start-btn" id="btn-start-game">Rozpocznij Draft</button>
+
+        <!-- NOWE STATYSTYKI -->
+        <div class="home-stats">
+            <div class="stat-item">
+                <div class="stat-num">44</div>
+                <div class="stat-label">Zespoły</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">600+</div>
+                <div class="stat-label">Piłkarzy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">40+</div>
+                <div class="stat-label">Lat Historii</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GAME APP -->
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-70">E11</div>
+            <div class="logo-text">
+                <div class="logo-title">EKSTRA11.PL</div>
+                <div class="logo-sub">Build · Simulate · Win</div>
+            </div>
+        </div>
+        <div class="header-menu">
+            <span id="header-fmt-display">4-3-3 · EKSTRAKLASA</span>
+            <button class="menu-btn" onclick="window.location.reload()">Zacznij od nowa</button>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-container">
+        <!-- LEFT: CONTROLS -->
+        <div class="left-panel">
+            <div id="draft-ui" style="display: none;">
+                <div class="section-label">Wylosowano Klub</div>
+                <div class="drawn-card" id="drawn-card">
+                    <div class="drawn-title">🇵🇱 <span id="team-name">Nazwa</span></div>
+                    <div class="drawn-cup" id="team-year">Sezon 00/00</div>
+                </div>
+
+                <div class="section-label">Dostępni Zawodnicy</div>
+                <div class="player-list-wrapper" id="player-list-wrapper">
+                    <div id="player-list"></div>
+                </div>
+            </div>
+
+            <button id="btn-initial-roll" class="initial-roll-btn">Losuj Klub 🎲</button>
+            <button id="btn-sim" class="initial-roll-btn btn-alt" style="display:none; animation: none;">Symuluj Sezon ⚡</button>
+        </div>
+
+        <!-- CENTER: PITCH -->
+        <div class="center-panel">
+            <div class="pitch-container">
+                <div class="pitch-lines">
+                    <div class="center-dot"></div>
+                </div>
+                <div class="penalty-area-top"></div>
+                <div class="penalty-arc-top"></div>
+                <div class="penalty-area-bottom"></div>
+                <div class="penalty-arc-bottom"></div>
+                
+                <div class="pitch-players" id="pitch-players">
+                    <!-- RENDEROWANE DYNAMICZNIE -->
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: ROSTER -->
+        <div class="right-panel">
+            <div class="box-score-header">
+                <span>Skład Ekstra11 · <span id="counter" style="color:var(--primary);">0/11</span></span>
+                <span>OVR: <span id="avg-ovr" style="color:var(--text-main); font-size:1.1rem;">0</span></span>
+            </div>
+
+            <div class="roster-list" id="roster-list">
+                <!-- RENDEROWANE DYNAMICZNIE -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <span>Ekstra11.pl · Stworzone dla fanów polskiej piłki</span>
+    </div>
+
+    <!-- LEAGUE SUMMARY SCREEN (DARK MODE) -->
+    <div id="summary-overlay">
+        <div class="summary-container">
+            <div class="summary-header">
+                <h2>Twoja XI</h2>
+                <div class="summary-subtitle"><span id="sum-fmt"></span> — Overall <span id="sum-ovr"></span></div>
+            </div>
+
+            <div class="squad-list" id="sum-squad-list">
+                <!-- Squad rendered dynamically -->
+            </div>
+
+            <div class="perf-grid-top">
+                <div class="box-dark">
+                    <div class="box-label">Zakończono</div>
+                    <div class="box-val" id="sum-finished"></div>
+                </div>
+                <div class="box-dark">
+                    <div class="box-label">Projektowano</div>
+                    <div class="box-val" id="sum-projected"></div>
+                </div>
+                <div class="box-dark" style="display:flex; align-items:center; justify-content:center;">
+                    <div class="box-val" id="sum-performance" style="font-size: 1rem; line-height: 1.2;"></div>
+                </div>
+            </div>
+
+            <div class="box-dark box-text">
+                <h3 id="sum-desc-title">Podsumowanie Sezonu</h3>
+                <p id="sum-desc-text"></p>
+            </div>
+
+            <div class="perf-grid-bottom">
+                <div class="box-dark">
+                    <div class="box-val c-win" id="sum-w"></div>
+                    <div class="box-label" style="margin-top:5px; margin-bottom:0; text-transform:none;">Wygrane</div>
+                </div>
+                <div class="box-dark">
+                    <div class="box-val c-draw" id="sum-d"></div>
+                    <div class="box-label" style="margin-top:5px; margin-bottom:0; text-transform:none;">Remisy</div>
+                </div>
+                <div class="box-dark">
+                    <div class="box-val c-loss" id="sum-l"></div>
+                    <div class="box-label" style="margin-top:5px; margin-bottom:0; text-transform:none;">Porażki</div>
+                </div>
+                <div class="box-dark">
+                    <div class="box-val" id="sum-pts"></div>
+                    <div class="box-label" style="margin-top:5px; margin-bottom:0; text-transform:none;">Punkty</div>
+                </div>
+                <div class="box-dark">
+                    <div class="box-val c-win" id="sum-gf"></div>
+                    <div class="box-label" style="margin-top:5px; margin-bottom:0; text-transform:none;">Bramki Zdobyte</div>
+                </div>
+                <div class="box-dark">
+                    <div class="box-val c-loss" id="sum-ga"></div>
+                    <div class="box-label" style="margin-top:5px; margin-bottom:0; text-transform:none;">Bramki Stracone</div>
+                </div>
+            </div>
+
+            <button class="btn-restart-dark" onclick="window.location.reload()">Zagraj Ponownie</button>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // RESTRYKCYJNE KONFIGURACJE FORMACJI
+        const formationsData = {
+            '4-3-3': [
+                { id: 'LW', reqPos: ['LW', 'LM'], left: '20%', top: '25%', tier: 'ATT' },
+                { id: 'ST', reqPos: ['ST', 'CF'], left: '50%', top: '18%', tier: 'ATT' },
+                { id: 'RW', reqPos: ['RW', 'RM'], left: '80%', top: '25%', tier: 'ATT' },
+                { id: 'CM1', reqPos: ['CM', 'CDM'], left: '28%', top: '50%', tier: 'MID' },
+                { id: 'CM2', reqPos: ['CM', 'CDM'], left: '50%', top: '58%', tier: 'MID' },
+                { id: 'CM3', reqPos: ['CM', 'CDM'], left: '72%', top: '50%', tier: 'MID' },
+                { id: 'LB', reqPos: ['LB', 'LWB'], left: '18%', top: '75%', tier: 'DEF' },
+                { id: 'CB1', reqPos: ['CB'], left: '38%', top: '82%', tier: 'DEF' },
+                { id: 'CB2', reqPos: ['CB'], left: '62%', top: '82%', tier: 'DEF' },
+                { id: 'RB', reqPos: ['RB', 'RWB'], left: '82%', top: '75%', tier: 'DEF' },
+                { id: 'GK', reqPos: ['GK'], left: '50%', top: '92%', tier: 'GK' }
+            ],
+            '4-4-2': [
+                { id: 'ST1', reqPos: ['ST', 'CF'], left: '40%', top: '20%', tier: 'ATT' },
+                { id: 'ST2', reqPos: ['ST', 'CF'], left: '60%', top: '20%', tier: 'ATT' },
+                { id: 'LM', reqPos: ['LM', 'LW'], left: '20%', top: '45%', tier: 'MID' },
+                { id: 'CM1', reqPos: ['CM', 'CDM'], left: '40%', top: '55%', tier: 'MID' },
+                { id: 'CM2', reqPos: ['CM', 'CDM'], left: '60%', top: '55%', tier: 'MID' },
+                { id: 'RM', reqPos: ['RM', 'RW'], left: '80%', top: '45%', tier: 'MID' },
+                { id: 'LB', reqPos: ['LB', 'LWB'], left: '18%', top: '75%', tier: 'DEF' },
+                { id: 'CB1', reqPos: ['CB'], left: '38%', top: '82%', tier: 'DEF' },
+                { id: 'CB2', reqPos: ['CB'], left: '62%', top: '82%', tier: 'DEF' },
+                { id: 'RB', reqPos: ['RB', 'RWB'], left: '82%', top: '75%', tier: 'DEF' },
+                { id: 'GK', reqPos: ['GK'], left: '50%', top: '92%', tier: 'GK' }
+            ],
+            '4-2-3-1': [
+                { id: 'ST', reqPos: ['ST', 'CF'], left: '50%', top: '15%', tier: 'ATT' },
+                { id: 'LW', reqPos: ['LW', 'LM'], left: '25%', top: '35%', tier: 'ATT' },
+                { id: 'RW', reqPos: ['RW', 'RM'], left: '75%', top: '35%', tier: 'ATT' },
+                { id: 'CAM', reqPos: ['CAM', 'CF'], left: '50%', top: '40%', tier: 'MID' },
+                { id: 'CDM1', reqPos: ['CDM', 'CM'], left: '35%', top: '62%', tier: 'MID' },
+                { id: 'CDM2', reqPos: ['CDM', 'CM'], left: '65%', top: '62%', tier: 'MID' },
+                { id: 'LB', reqPos: ['LB', 'LWB'], left: '18%', top: '75%', tier: 'DEF' },
+                { id: 'CB1', reqPos: ['CB'], left: '38%', top: '82%', tier: 'DEF' },
+                { id: 'CB2', reqPos: ['CB'], left: '62%', top: '82%', tier: 'DEF' },
+                { id: 'RB', reqPos: ['RB', 'RWB'], left: '82%', top: '75%', tier: 'DEF' },
+                { id: 'GK', reqPos: ['GK'], left: '50%', top: '92%', tier: 'GK' }
+            ],
+            '5-3-2': [
+                { id: 'ST1', reqPos: ['ST', 'CF'], left: '40%', top: '20%', tier: 'ATT' },
+                { id: 'ST2', reqPos: ['ST', 'CF'], left: '60%', top: '20%', tier: 'ATT' },
+                { id: 'CM1', reqPos: ['CM', 'CDM'], left: '35%', top: '45%', tier: 'MID' },
+                { id: 'CM2', reqPos: ['CM', 'CDM'], left: '50%', top: '50%', tier: 'MID' },
+                { id: 'CM3', reqPos: ['CM', 'CDM'], left: '65%', top: '45%', tier: 'MID' },
+                { id: 'LWB', reqPos: ['LWB', 'LB'], left: '15%', top: '65%', tier: 'DEF' },
+                { id: 'CB1', reqPos: ['CB'], left: '32%', top: '80%', tier: 'DEF' },
+                { id: 'CB2', reqPos: ['CB'], left: '50%', top: '85%', tier: 'DEF' },
+                { id: 'CB3', reqPos: ['CB'], left: '68%', top: '80%', tier: 'DEF' },
+                { id: 'RWB', reqPos: ['RWB', 'RB'], left: '85%', top: '65%', tier: 'DEF' },
+                { id: 'GK', reqPos: ['GK'], left: '50%', top: '92%', tier: 'GK' }
+            ]
+        };
+
+        let currentFormation = [];
+        let usedTeams = [];
+        let draftedCount = 0;
+
+        function getPlayerTier(posArray) {
+            const p = posArray[0];
+            if (p === 'GK') return 1;
+            if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(p)) return 2;
+            if (['CM', 'CDM', 'CAM', 'RM', 'LM'].includes(p)) return 3;
+            return 4;
+        }
+
+        const fmtButtons = document.querySelectorAll('.fmt-btn');
+        let selectedFmtKey = '4-3-3';
+
+        fmtButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                fmtButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                selectedFmtKey = e.target.getAttribute('data-fmt');
+            });
+        });
+
+        document.getElementById('btn-start-game').addEventListener('click', () => {
+            currentFormation = JSON.parse(JSON.stringify(formationsData[selectedFmtKey]));
+            currentFormation.forEach(slot => slot.filledBy = null); 
+
+            document.getElementById('header-fmt-display').innerText = `${selectedFmtKey} · EKSTRAKLASA`;
+            
+            const pitchContainer = document.getElementById('pitch-players');
+            pitchContainer.innerHTML = '';
+            currentFormation.forEach((slot, idx) => {
+                pitchContainer.innerHTML += `
+                    <div class="p-node" id="node-${slot.id}" style="left: ${slot.left}; top: ${slot.top}; animation-delay: ${idx * 0.04}s;">
+                        <div class="p-circle">${slot.id.replace(/[0-9]/g, '')}</div>
+                        <div class="p-name-pitch"></div>
+                    </div>
+                `;
+            });
+
+            const rosterContainer = document.getElementById('roster-list');
+            rosterContainer.innerHTML = '';
+            let lastTier = '';
+            
+            currentFormation.forEach(slot => {
+                if (lastTier !== '' && lastTier !== slot.tier) {
+                    rosterContainer.innerHTML += `<div class="roster-divider"></div>`;
+                }
+                lastTier = slot.tier;
+                rosterContainer.innerHTML += `
+                    <div class="roster-row" id="row-${slot.id}">
+                        <div class="r-pos">${slot.id.replace(/[0-9]/g, '')}</div>
+                        <div class="r-name">—</div>
+                        <div class="r-ovr"></div>
+                    </div>
+                `;
+            });
+
+            const homeScreen = document.getElementById('home-screen');
+            homeScreen.style.animation = 'fadeOutUp 0.6s forwards';
+            setTimeout(() => {
+                homeScreen.style.display = 'none';
+                document.getElementById('app-container').style.opacity = '1';
+            }, 500);
+        });
+
+        function clearHighlights() {
+            document.querySelectorAll('.draft-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.p-node').forEach(n => {
+                n.classList.remove('highlight-target');
+                n.onclick = null;
+            });
+        }
+
+        const btnRoll = document.getElementById('btn-initial-roll');
+        
+        btnRoll.addEventListener('click', () => {
+            const availableTeams = db.filter(t => !usedTeams.includes(t.id));
+            if(availableTeams.length === 0) return;
+
+            const team = availableTeams[Math.floor(Math.random() * availableTeams.length)];
+            
+            btnRoll.style.display = 'none';
+            document.getElementById('draft-ui').style.display = 'block';
+            document.getElementById('drawn-card').style.display = 'block';
+            document.getElementById('player-list-wrapper').style.display = 'block';
+
+            document.getElementById('team-name').innerText = team.name;
+            document.getElementById('team-year').innerText = "Sezon " + team.year;
+            
+            renderPlayerCards(team);
+        });
+
+        function renderPlayerCards(team) {
+            const listUI = document.getElementById('player-list');
+            listUI.innerHTML = '';
+            clearHighlights();
+
+            team.players.sort((a, b) => getPlayerTier(a.pos) - getPlayerTier(b.pos));
+
+            let anyPlayerFits = false;
+
+            team.players.forEach(player => {
+                const availableSlots = currentFormation.filter(slot => 
+                    slot.filledBy === null && player.pos.some(p => slot.reqPos.includes(p))
+                );
+
+                if(availableSlots.length > 0) anyPlayerFits = true;
+
+                const card = document.createElement('div');
+                card.className = `draft-card ${availableSlots.length === 0 ? 'disabled' : ''}`;
+                card.innerHTML = `
+                    <div class="p-num">#${player.num || '-'}</div>
+                    <div class="p-name">${player.name}</div>
+                    <div class="p-pos">${player.pos.join('/')}</div>
+                    <div class="p-ovr">${player.ovr}</div>
+                `;
+
+                if (availableSlots.length === 1) {
+                    card.onclick = () => {
+                        clearHighlights();
+                        player.teamName = team.name;
+                        player.teamYear = team.year;
+                        pickPlayer(player, team.id, availableSlots[0]);
+                    };
+                } else if (availableSlots.length > 1) {
+                    card.onclick = () => {
+                        player.teamName = team.name;
+                        player.teamYear = team.year;
+                        selectPlayerForPlacement(player, team.id, availableSlots, card);
+                    }
+                }
+                listUI.appendChild(card);
+            });
+
+            if (!anyPlayerFits) {
+                listUI.innerHTML = `
+                <div style="text-align:center; padding: 25px 15px;">
+                    <p style="font-size:0.8rem; font-weight:800; color:var(--primary); margin-bottom:15px; text-transform:uppercase;">Brak graczy na wolne pozycje!</p>
+                    <button id="btn-skip-team" class="initial-roll-btn btn-alt" style="margin-top:0; padding: 12px; font-size:0.9rem;">LOSUJ INNĄ DRUŻYNĘ</button>
+                </div>`;
+                document.getElementById('btn-skip-team').addEventListener('click', () => {
+                    usedTeams.push(team.id); 
+                    document.getElementById('btn-initial-roll').click(); 
+                });
+            }
+        }
+
+        function selectPlayerForPlacement(player, teamId, availableSlots, cardElement) {
+            clearHighlights();
+            cardElement.classList.add('selected');
+            
+            availableSlots.forEach(slot => {
+                const node = document.getElementById(`node-${slot.id}`);
+                node.classList.add('highlight-target');
+                node.querySelector('.p-circle').innerText = slot.id.replace(/[0-9]/g, '');
+                
+                node.onclick = () => {
+                    clearHighlights();
+                    pickPlayer(player, teamId, slot);
+                };
+            });
+        }
+
+        function pickPlayer(player, teamId, targetSlot) {
+            targetSlot.filledBy = player;
+            usedTeams.push(teamId);
+            draftedCount++;
+
+            const row = document.getElementById(`row-${targetSlot.id}`);
+            row.classList.add('filled');
+            row.querySelector('.r-name').innerText = player.name;
+            row.querySelector('.r-ovr').innerText = player.ovr;
+
+            const node = document.getElementById(`node-${targetSlot.id}`);
+            node.classList.add('filled');
+            node.querySelector('.p-circle').innerText = player.ovr;
+            node.querySelector('.p-name-pitch').innerText = player.name;
+
+            let sumOvr = 0;
+            currentFormation.forEach(s => {
+                if(s.filledBy) sumOvr += s.filledBy.ovr;
+            });
+            const avgOvr = Math.round(sumOvr / draftedCount);
+            
+            document.getElementById('counter').innerText = `${draftedCount}/11`;
+            document.getElementById('avg-ovr').innerText = avgOvr;
+            
+            document.getElementById('draft-ui').style.display = 'none';
+            document.getElementById('drawn-card').style.display = 'none';
+            document.getElementById('player-list-wrapper').style.display = 'none';
+            
+            if(draftedCount < 11) {
+                const mainBtn = document.getElementById('btn-initial-roll');
+                mainBtn.style.display = 'block';
+                mainBtn.innerText = 'Kolejny Rzut 🎲';
+                
+                if(window.innerWidth <= 1024) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } else {
+                document.getElementById('btn-sim').style.display = 'block';
+            }
+        }
+
+        document.getElementById('btn-sim').addEventListener('click', () => {
+            let totalOvr = 0;
+            currentFormation.forEach(s => totalOvr += s.filledBy.ovr);
+            let myOvr = Math.round(totalOvr / 11);
+
+            let leagueTeams = [];
+            
+            // 1. ZABEZPIECZENIE PRZED 40 MECZAMI: bierzemy dokładnie 17 przeciwników
+            let availableAiTeams = db.filter(t => t.year === "2025/26");
+            availableAiTeams = availableAiTeams.sort(() => 0.5 - Math.random()).slice(0, 17);
+
+            availableAiTeams.forEach(t => {
+                let ovrSum = t.players.reduce((sum, p) => sum + p.ovr, 0);
+                // 2. POZIOM TRUDNOŚCI: Przeciwnicy dostają +3 OVR za "zgranie zespołu"
+                let ovrAvg = Math.round(ovrSum / t.players.length) + 3; 
+                leagueTeams.push({ id: t.id, name: t.name, ovr: ovrAvg, pts: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 });
+            });
+            
+            leagueTeams.sort((a, b) => b.ovr - a.ovr);
+            leagueTeams.pop(); 
+            
+            let myTeam = { id: 'EKSTRA11', name: 'Twoja XI', ovr: myOvr, pts: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, isPlayer: true };
+            leagueTeams.push(myTeam);
+
+            let projectedRank = [...leagueTeams].sort((a, b) => b.ovr - a.ovr).findIndex(t => t.id === 'EKSTRA11') + 1;
+
+            for (let i = 0; i < leagueTeams.length; i++) {
+                for (let j = 0; j < leagueTeams.length; j++) {
+                    if (i === j) continue;
+                    let t1 = leagueTeams[i];
+                    let t2 = leagueTeams[j];
+                    
+                    let diff = t1.ovr - t2.ovr;
+                    let performance = diff + ((Math.random() * 36) - 18);
+                    
+                    let g1 = 0, g2 = 0;
+                    if (performance > 12) { g1 = Math.floor(Math.random()*3)+2; g2 = Math.floor(Math.random()*2); }
+                    else if (performance > 5) { g1 = Math.floor(Math.random()*3)+1; g2 = Math.floor(Math.random()*2); }
+                    else if (performance > -5) { g1 = Math.floor(Math.random()*3); g2 = Math.floor(Math.random()*3); }
+                    else if (performance > -12) { g1 = Math.floor(Math.random()*2); g2 = Math.floor(Math.random()*3)+1; }
+                    else { g1 = Math.floor(Math.random()*2); g2 = Math.floor(Math.random()*3)+2; }
+
+                    if (diff > 5 && Math.random() < 0.025) {
+                        g1 = Math.floor(Math.random()*2);
+                        g2 = Math.floor(Math.random()*2)+2;
+                    }
+
+                    t1.gf += g1; t1.ga += g2;
+                    t2.gf += g2; t2.ga += g1;
+
+                    if (g1 > g2) { t1.pts += 3; t1.w++; t2.l++; }
+                    else if (g1 < g2) { t2.pts += 3; t2.w++; t1.l++; }
+                    else { t1.pts += 1; t2.pts += 1; t1.d++; t2.d++; }
+                }
+            }
+
+            leagueTeams.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                let gdA = a.gf - a.ga; let gdB = b.gf - b.ga;
+                if (gdB !== gdA) return gdB - gdA;
+                return b.gf - a.gf;
+            });
+
+            let finishedRank = leagueTeams.findIndex(t => t.id === 'EKSTRA11') + 1;
+            
+            document.getElementById('sum-fmt').innerText = selectedFmtKey;
+            document.getElementById('sum-ovr').innerText = myOvr;
+
+            const squadListUI = document.getElementById('sum-squad-list');
+            squadListUI.innerHTML = '';
+            
+            const sortedSquad = [...currentFormation].sort((a, b) => getPlayerTier(a.reqPos) - getPlayerTier(b.reqPos));
+            sortedSquad.forEach(slot => {
+                let posColorClass = 'pos-ST';
+                if (['CM','CDM','CAM','RM','LM'].includes(slot.id.replace(/[0-9]/g, ''))) posColorClass = 'pos-CM';
+                else if (['CB','LB','RB','LWB','RWB'].includes(slot.id.replace(/[0-9]/g, ''))) posColorClass = 'pos-CB';
+                else if (slot.id === 'GK') posColorClass = 'pos-GK';
+
+                squadListUI.innerHTML += `
+                    <div class="sq-row">
+                        <div class="sq-left">
+                            <div class="sq-pos ${posColorClass}">${slot.id.replace(/[0-9]/g, '')}</div>
+                            <div class="sq-name">${slot.filledBy.name}</div>
+                        </div>
+                        <div class="sq-right">
+                            <div class="dot" style="background:${posColorClass === 'pos-ST' ? '#ef4444' : posColorClass === 'pos-CM' ? '#3b82f6' : posColorClass === 'pos-CB' ? '#10b981' : '#f59e0b'}"></div>
+                            <span>${slot.filledBy.teamName}</span>
+                            <span style="opacity:0.5;">${slot.filledBy.teamYear}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('sum-finished').innerText = finishedRank;
+            document.getElementById('sum-projected').innerText = projectedRank;
+
+            let perfText = finishedRank < projectedRank ? "Powyżej planu" : finishedRank > projectedRank ? "Poniżej oczekiwań" : "Zgodnie z planem";
+            let perfColor = finishedRank < projectedRank ? "var(--c-win)" : finishedRank > projectedRank ? "var(--c-loss)" : "var(--c-draw)";
+            
+            if (finishedRank === 1) { perfText = "MISTRZOSTWO!"; perfColor = "var(--c-win)"; }
+            document.getElementById('sum-performance').innerText = perfText;
+            document.getElementById('sum-performance').style.color = perfColor;
+
+            let desc = "";
+            if (finishedRank === 1 && myTeam.l === 0) desc = `NIESAMOWITE! Sezon bez ani jednej porażki! "The Invincibles" Ekstraklasy. Przeszliście do historii polskiej piłki notując ${myTeam.w} zwycięstw.`;
+            else if (finishedRank === 1) desc = `Mistrzostwo zdobyte z wielką klasą. Twoja drużyna zdominowała Ekstraklasę, zdobywając ${myTeam.pts} punktów i deklasując rywali w kluczowych momentach sezonu.`;
+            else if (finishedRank <= 3) desc = `Świetny sezon zakończony na podium (${finishedRank}. miejsce). Było blisko, ale trochę zabrakło do samego szczytu. Zdobyliście szacowne ${myTeam.pts} pkt.`;
+            else if (finishedRank <= 8) desc = `${finishedRank}. miejsce i ${myTeam.pts} punktów na koncie. Spokojny środek tabeli, chociaż po cichu pewnie liczyliście na start w europejskich pucharach.`;
+            else if (finishedRank >= 16) desc = `Tragedia i spadek z ligi... ${finishedRank}. miejsce to potężny cios dla tego projektu po ${myTeam.l} porażkach. Definitywnie potrzebujecie nowego planu sportowego.`;
+            else desc = `Rozczarowujący sezon zakończony dopiero na ${finishedRank}. pozycji. Zaledwie ${myTeam.w} wygranych nie mogło dać niczego więcej w tej wymagającej lidze.`;
+
+            document.getElementById('sum-desc-text').innerText = desc;
+
+            document.getElementById('sum-w').innerText = myTeam.w;
+            document.getElementById('sum-d').innerText = myTeam.d;
+            document.getElementById('sum-l').innerText = myTeam.l;
+            document.getElementById('sum-pts').innerText = myTeam.pts;
+            document.getElementById('sum-gf').innerText = myTeam.gf;
+            document.getElementById('sum-ga').innerText = myTeam.ga;
+
+            document.getElementById('summary-overlay').style.display = 'flex';
+        });
+
+    });
+    </script>
+</body>
+</html>
